@@ -3,6 +3,7 @@ const path = require("node:path");
 const { Client, Events, GatewayIntentBits, EmbedBuilder, PermissionFlagsBits } = require("discord.js");
 const { handleAdminCommand } = require("./admin-commands");
 const { handleAiPromptCommand, handleAiPromptTestCommand } = require("./ai-prompt-command");
+const { startServerBackups } = require("./server-backup");
 const { curioCommand, setupCurioByte, attachAuditLogging } = require("./server-setup");
 
 const configPath = path.join(__dirname, "..", ".private", "config.json");
@@ -32,6 +33,7 @@ const inviteUrl = config.inviteUrl || `https://discord.com/oauth2/authorize?clie
 
 client.once(Events.ClientReady, readyClient => {
   console.log(`Curio.Byte is online as ${readyClient.user.tag}`);
+  startServerBackups(readyClient);
 });
 
 client.on(Events.InteractionCreate, async interaction => {
