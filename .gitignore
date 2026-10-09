@@ -8,3 +8,7 @@ node_modules/
 npm-debug.log*
 yarn-debug.log*
 pnpm-debug.log*
+
+# Server backups (contain webhook tokens)
+bots/Curio.Byte/server-backups/
+server-backups/
