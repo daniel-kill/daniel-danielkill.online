@@ -1,0 +1,21 @@
+const body = document.body;
+const toggleButton = document.querySelector('.theme-toggle');
+const themeIcon = document.querySelector('.theme-toggle__icon');
+
+const applyTheme = (isDark) => {
+  body.classList.toggle('light-theme', !isDark);
+  themeIcon.textContent = isDark ? '☀️' : '🌙';
+  toggleButton.setAttribute('aria-label', isDark ? 'Switch to light theme' : 'Switch to dark theme');
+};
+
+const savedTheme = localStorage.getItem('theme');
+const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+const initialIsDark = savedTheme ? savedTheme === 'dark' : prefersDark;
+
+applyTheme(initialIsDark);
+
+toggleButton.addEventListener('click', () => {
+  const isDark = !body.classList.contains('light-theme');
+  localStorage.setItem('theme', isDark ? 'dark' : 'light');
+  applyTheme(isDark);
+});

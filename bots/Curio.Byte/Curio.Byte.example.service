@@ -1,0 +1,21 @@
+[Unit]
+Description=Curio.Byte Discord bot
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=simple
+User=YOUR_LINUX_USER
+WorkingDirectory=/path/to/Curio.Byte
+Environment=NODE_ENV=production
+ExecStart=/path/to/node /path/to/Curio.Byte/src/index.js
+StandardOutput=append:/path/to/Curio.Byte/.logs/output.log
+StandardError=append:/path/to/Curio.Byte/.logs/error.log
+Restart=on-failure
+RestartSec=5s
+TimeoutStopSec=15s
+KillSignal=SIGTERM
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target

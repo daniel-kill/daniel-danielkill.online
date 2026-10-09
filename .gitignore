@@ -1,0 +1,10 @@
+# Local configuration and secrets
+.private/
+.logs/
+.env
+
+# Node.js dependencies and logs
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*

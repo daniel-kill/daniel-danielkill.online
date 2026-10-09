@@ -1,0 +1,9 @@
+2026-01-10T10:00:00Z INFO Service started
+2026-01-10T10:00:01Z DEBUG Loading configuration
+2026-01-10T10:00:02Z INFO Configuration loaded
+2026-01-10T10:01:00Z WARN Retry scheduled
+2026-01-10T10:01:04Z ERROR Request failed
+2026-01-10T10:01:10Z INFO Request completed
+2026-01-10T10:02:00Z ERROR Request failed
+not-a-valid-log-line
+2026-01-10T10:03:00Z INFO Service stopped
