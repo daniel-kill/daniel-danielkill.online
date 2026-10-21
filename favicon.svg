@@ -1,21 +1,10 @@
-const body = document.body;
-const toggleButton = document.querySelector('.theme-toggle');
-const themeIcon = document.querySelector('.theme-toggle__icon');
-
-const applyTheme = (isDark) => {
-  body.classList.toggle('light-theme', !isDark);
-  themeIcon.textContent = isDark ? '☀️' : '🌙';
-  toggleButton.setAttribute('aria-label', isDark ? 'Switch to light theme' : 'Switch to dark theme');
-};
-
-const savedTheme = localStorage.getItem('theme');
-const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-const initialIsDark = savedTheme ? savedTheme === 'dark' : prefersDark;
-
-applyTheme(initialIsDark);
-
-toggleButton.addEventListener('click', () => {
-  const isDark = !body.classList.contains('light-theme');
-  localStorage.setItem('theme', isDark ? 'dark' : 'light');
-  applyTheme(isDark);
-});
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="DK monogram">
+  <defs>
+    <linearGradient id="g" x1="0%" x2="100%" y1="0%" y2="100%">
+      <stop offset="0%" stop-color="#8ce6d0" />
+      <stop offset="100%" stop-color="#9caeff" />
+    </linearGradient>
+  </defs>
+  <rect width="128" height="128" rx="28" fill="#090d18" />
+  <path d="M32 96V32h18l18 24 18-24h18v64H86V59L66 83H62L42 59v37H32Z" fill="url(#g)"/>
+</svg>
