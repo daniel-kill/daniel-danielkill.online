@@ -7,6 +7,7 @@ const { startServerBackups } = require("./server-backup");
 const { curioCommand, setupCurioByte, attachAuditLogging } = require("./server-setup");
 const { pollCommand, handlePollCommand } = require("./commands/poll");
 const { projectCommand, handleProjectCommand } = require("./commands/project");
+const { analyticsCommand, handleAnalyticsCommand } = require("./commands/analytics");
 
 const configPath = path.join(__dirname, "..", ".private", "config.json");
 if (!fs.existsSync(configPath)) {
@@ -41,6 +42,7 @@ const commandDefinitions = [
   new SlashCommandBuilder().setName("help").setDescription("Show Curio.Byte's available commands."),
   pollCommand,
   projectCommand,
+  analyticsCommand,
   curioCommand,
   aiPromptCommand,
   ...adminCommands
@@ -67,13 +69,17 @@ client.on(Events.InteractionCreate, async interaction => {
   if (!interaction.isChatInputCommand()) return;
 
   try {
-    if (["moderation", "channel", "role", "server", "curio-byte"].includes(interaction.commandName)) {
+    if (["moderation", "channel", "role", "server", "curio-byte", "analytics"].includes(interaction.commandName)) {
       if (!interaction.inGuild()) {
         await interaction.reply({ content: "These commands can only be used inside a server.", ephemeral: true });
         return;
       }
       if (!interaction.memberPermissions?.has(PermissionFlagsBits.Administrator)) {
         await interaction.reply({ content: "You need the Administrator permission to use this command.", ephemeral: true });
+        return;
+      }
+      if (interaction.commandName === "analytics") {
+        await handleAnalyticsCommand(interaction);
         return;
       }
       await interaction.deferReply({ ephemeral: true });
@@ -146,6 +152,7 @@ client.on(Events.InteractionCreate, async interaction => {
             "**Curio.Byte commands**",
             "`/poll` — create an interactive server poll with button voting",
             "`/project [query]` — search portfolio projects by keyword or language",
+            "`/analytics` — view server member statistics, channels, and backup metrics (server administrators)",
             "`/ai-prompt ask` — ask an AI assistant a question or get help with a task (private response)",
             "`/ai-prompt test provider:<Groq|Cloudflare Workers AI|Gemini|OpenRouter|Venice>` — test one provider directly (private response)",
             "`/about` — learn about the bot and its mission",
