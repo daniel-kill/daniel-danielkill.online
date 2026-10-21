@@ -42,7 +42,7 @@ See bots/Curio.Byte/README.md for bot installation, configuration, Discord permi
 
 ### AI provider priority
 
-When credentials are configured, /ai-prompt ask attempts providers in this order:
+When credentials are configured, /ai-prompt ask attempts providers in the order below:
 
 1. Groq
 2. Cloudflare Workers AI
