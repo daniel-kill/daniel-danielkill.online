@@ -1,10 +1,11 @@
 const fs = require("node:fs");
 const path = require("node:path");
-const { Client, Events, GatewayIntentBits, EmbedBuilder, PermissionFlagsBits } = require("discord.js");
-const { handleAdminCommand } = require("./admin-commands");
-const { handleAiPromptCommand, handleAiPromptTestCommand } = require("./ai-prompt-command");
+const { Client, Events, GatewayIntentBits, EmbedBuilder, PermissionFlagsBits, REST, Routes, SlashCommandBuilder } = require("discord.js");
+const { adminCommands, handleAdminCommand } = require("./admin-commands");
+const { aiPromptCommand, handleAiPromptCommand, handleAiPromptTestCommand } = require("./ai-prompt-command");
 const { startServerBackups } = require("./server-backup");
 const { curioCommand, setupCurioByte, attachAuditLogging } = require("./server-setup");
+const { pollCommand, handlePollCommand } = require("./commands/poll");
 
 const configPath = path.join(__dirname, "..", ".private", "config.json");
 if (!fs.existsSync(configPath)) {
@@ -31,8 +32,32 @@ const client = new Client({
 attachAuditLogging(client);
 const inviteUrl = config.inviteUrl || `https://discord.com/oauth2/authorize?client_id=${config.applicationId}&scope=bot%20applications.commands`;
 
-client.once(Events.ClientReady, readyClient => {
+const commandDefinitions = [
+  new SlashCommandBuilder().setName("about").setDescription("Learn about Curio.Byte and its mission."),
+  new SlashCommandBuilder().setName("projects").setDescription("Showcase the Code, Build, Repeat programming projects."),
+  new SlashCommandBuilder().setName("languages").setDescription("List the programming languages and tools featured."),
+  new SlashCommandBuilder().setName("invite").setDescription("Get the link to invite Curio.Byte to a server."),
+  new SlashCommandBuilder().setName("help").setDescription("Show Curio.Byte's available commands."),
+  pollCommand,
+  curioCommand,
+  aiPromptCommand,
+  ...adminCommands
+].map(cmd => cmd.toJSON());
+
+async function registerCommandsAutomatically() {
+  try {
+    const rest = new REST({ version: "10" }).setToken(config.botToken);
+    console.log(`Auto-registering ${commandDefinitions.length} global slash commands...`);
+    await rest.put(Routes.applicationCommands(config.applicationId), { body: commandDefinitions });
+    console.log("✅ Global slash commands successfully auto-registered on startup.");
+  } catch (error) {
+    console.error("❌ Automatic command registration failed:", error.message);
+  }
+}
+
+client.once(Events.ClientReady, async readyClient => {
   console.log(`Curio.Byte is online as ${readyClient.user.tag}`);
+  await registerCommandsAutomatically();
   startServerBackups(readyClient);
 });
 
@@ -65,6 +90,10 @@ client.on(Events.InteractionCreate, async interaction => {
     }
 
     switch (interaction.commandName) {
+      case "poll": {
+        await handlePollCommand(interaction);
+        break;
+      }
       case "about": {
         const embed = new EmbedBuilder()
           .setColor(0x8b8df8)
@@ -109,6 +138,7 @@ client.on(Events.InteractionCreate, async interaction => {
         await interaction.reply({
           content: [
             "**Curio.Byte commands**",
+            "`/poll` — create an interactive server poll with button voting",
             "`/ai-prompt ask` — ask an AI assistant a question or get help with a task (private response)",
             "`/ai-prompt test provider:<Groq|Cloudflare Workers AI|Gemini|OpenRouter|Venice>` — test one provider directly (private response)",
             "`/about` — learn about the bot and its mission",
@@ -150,4 +180,3 @@ client.login(config.botToken).catch(error => {
   console.error(error.message);
   process.exitCode = 1;
 });
-// CI/CD Pipeline Test - Wed Oct 21 17:54:20 EDT 2026

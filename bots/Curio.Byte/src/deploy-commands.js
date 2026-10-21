@@ -4,6 +4,7 @@ const { REST, Routes, SlashCommandBuilder } = require("discord.js");
 const { adminCommands } = require("./admin-commands");
 const { aiPromptCommand } = require("./ai-prompt-command");
 const { curioCommand } = require("./server-setup");
+const { pollCommand } = require("./commands/poll");
 
 const configPath = path.join(__dirname, "..", ".private", "config.json");
 if (!fs.existsSync(configPath)) {
@@ -23,6 +24,7 @@ const commands = [
   new SlashCommandBuilder().setName("languages").setDescription("List the programming languages and tools featured."),
   new SlashCommandBuilder().setName("invite").setDescription("Get the link to invite Curio.Byte to a server."),
   new SlashCommandBuilder().setName("help").setDescription("Show Curio.Byte's available commands."),
+  pollCommand,
   curioCommand,
   aiPromptCommand,
   ...adminCommands
