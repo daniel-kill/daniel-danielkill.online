@@ -6,6 +6,7 @@ const { aiPromptCommand, handleAiPromptCommand, handleAiPromptTestCommand } = re
 const { startServerBackups } = require("./server-backup");
 const { curioCommand, setupCurioByte, attachAuditLogging } = require("./server-setup");
 const { pollCommand, handlePollCommand } = require("./commands/poll");
+const { projectCommand, handleProjectCommand } = require("./commands/project");
 
 const configPath = path.join(__dirname, "..", ".private", "config.json");
 if (!fs.existsSync(configPath)) {
@@ -39,6 +40,7 @@ const commandDefinitions = [
   new SlashCommandBuilder().setName("invite").setDescription("Get the link to invite Curio.Byte to a server."),
   new SlashCommandBuilder().setName("help").setDescription("Show Curio.Byte's available commands."),
   pollCommand,
+  projectCommand,
   curioCommand,
   aiPromptCommand,
   ...adminCommands
@@ -94,6 +96,10 @@ client.on(Events.InteractionCreate, async interaction => {
         await handlePollCommand(interaction);
         break;
       }
+      case "project": {
+        await handleProjectCommand(interaction);
+        break;
+      }
       case "about": {
         const embed = new EmbedBuilder()
           .setColor(0x8b8df8)
@@ -139,6 +145,7 @@ client.on(Events.InteractionCreate, async interaction => {
           content: [
             "**Curio.Byte commands**",
             "`/poll` — create an interactive server poll with button voting",
+            "`/project [query]` — search portfolio projects by keyword or language",
             "`/ai-prompt ask` — ask an AI assistant a question or get help with a task (private response)",
             "`/ai-prompt test provider:<Groq|Cloudflare Workers AI|Gemini|OpenRouter|Venice>` — test one provider directly (private response)",
             "`/about` — learn about the bot and its mission",
