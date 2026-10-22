@@ -12,3 +12,11 @@ pnpm-debug.log*
 # Server backups (contain webhook tokens)
 bots/Curio.Byte/server-backups/
 server-backups/
+
+# SQLite databases and data directories
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+bots/Curio.Byte/data/
+
