@@ -194,3 +194,40 @@ client.login(config.botToken).catch(error => {
   console.error(error.message);
   process.exitCode = 1;
 });
+
+// --- Enhanced Audit Logging Listeners ---
+const { sendLog } = require('./server-setup');
+
+client.on('messageDelete', async message => {
+  if (!message.guild || message.author?.bot) return;
+
+  const embed = new EmbedBuilder()
+    .setTitle('🗑️ Message Deleted')
+    .setDescription(`A message by **${message.author.tag}** was deleted in <#${message.channel.id}>.`)
+    .addFields({ name: 'Content', value: message.content || '*[Embed or Attachment]*' })
+    .setColor(0xFF3333)
+    .setTimestamp();
+
+  await sendLog(message.guild, embed);
+});
+
+client.on('guildMemberAdd', async member => {
+  const embed = new EmbedBuilder()
+    .setTitle('📥 Member Joined')
+    .setDescription(`**${member.user.tag}** joined the server.`)
+    .setThumbnail(member.user.displayAvatarURL())
+    .setColor(0x00FF99)
+    .setTimestamp();
+
+  await sendLog(member.guild, embed);
+});
+
+client.on('guildMemberRemove', async member => {
+  const embed = new EmbedBuilder()
+    .setTitle('📤 Member Left')
+    .setDescription(`**${member.user.tag}** left the server.`)
+    .setColor(0xFFA500)
+    .setTimestamp();
+
+  await sendLog(member.guild, embed);
+});
