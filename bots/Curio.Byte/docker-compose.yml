@@ -1,0 +1,15 @@
+services:
+  curio-byte:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: curio-byte
+    restart: unless-stopped
+    volumes:
+      - ./.private:/usr/src/app/.private
+      - ./backups:/usr/src/app/backups
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
