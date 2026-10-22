@@ -1,6 +1,5 @@
 const { EmbedBuilder, ChannelType, PermissionFlagsBits } = require('discord.js');
 
-// In-memory or database store for log channel mapping per guild
 const logChannels = new Map();
 
 async function setupGuild(interaction) {
@@ -13,7 +12,6 @@ async function setupGuild(interaction) {
   const guild = interaction.guild;
 
   try {
-    // 1. Create a private Admin category if it doesn't exist
     let adminCategory = guild.channels.cache.find(
       c => c.name === '🔒 Admin & Logs' && c.type === ChannelType.GuildCategory
     );
@@ -35,7 +33,6 @@ async function setupGuild(interaction) {
       });
     }
 
-    // 2. Create the #logs channel inside that category
     let logsChannel = guild.channels.cache.find(
       c => c.name === 'logs' && c.parentId === adminCategory.id
     );
@@ -74,7 +71,6 @@ function getLogChannel(guild) {
   if (logChannels.has(guild.id)) {
     return guild.channels.cache.get(logChannels.get(guild.id));
   }
-  // Fallback search by name if not in cache
   return guild.channels.cache.find(c => c.name === 'logs' && c.type === ChannelType.GuildText);
 }
 
@@ -88,4 +84,40 @@ async function sendLog(guild, embed) {
   }
 }
 
-module.exports = { setupGuild, sendLog };
+function attachAuditLogging(client) {
+  client.on('messageDelete', async message => {
+    if (!message.guild || message.author?.bot) return;
+
+    const embed = new EmbedBuilder()
+      .setTitle('🗑️ Message Deleted')
+      .setDescription(`A message by **${message.author.tag}** was deleted in <#${message.channel.id}>.`)
+      .addFields({ name: 'Content', value: message.content || '*[Embed or Attachment]*' })
+      .setColor(0xFF3333)
+      .setTimestamp();
+
+    await sendLog(message.guild, embed);
+  });
+
+  client.on('guildMemberAdd', async member => {
+    const embed = new EmbedBuilder()
+      .setTitle('📥 Member Joined')
+      .setDescription(`**${member.user.tag}** joined the server.`)
+      .setThumbnail(member.user.displayAvatarURL())
+      .setColor(0x00FF99)
+      .setTimestamp();
+
+    await sendLog(member.guild, embed);
+  });
+
+  client.on('guildMemberRemove', async member => {
+    const embed = new EmbedBuilder()
+      .setTitle('📤 Member Left')
+      .setDescription(`**${member.user.tag}** left the server.`)
+      .setColor(0xFFA500)
+      .setTimestamp();
+
+    await sendLog(member.guild, embed);
+  });
+}
+
+module.exports = { setupGuild, sendLog, attachAuditLogging };
