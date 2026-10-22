@@ -1,18 +1,15 @@
-# Use official Node.js alpine image for a minimal footprint
-FROM node:20-alpine AS base
+FROM node:22-alpine
 
-# Create app directory
 WORKDIR /usr/src/app
+
+# Install build dependencies for native modules (like better-sqlite3)
+RUN apk add --no-cache python3 make g++
 
 # Copy package files and install dependencies
 COPY package*.json ./
-RUN npm ci --only=production
+RUN npm ci --omit=dev
 
 # Copy application source code
 COPY . .
 
-# Set environment to production
-ENV NODE_ENV=production
-
-# Start the bot
 CMD ["node", "src/index.js"]
