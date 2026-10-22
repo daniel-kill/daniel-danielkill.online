@@ -8,6 +8,9 @@ services:
     volumes:
       - ./.private:/usr/src/app/.private
       - ./backups:/usr/src/app/backups
+      - ./data:/usr/src/app/data
+    environment:
+      - DB_PATH=/usr/src/app/data/curio.db
     logging:
       driver: "json-file"
       options:
