@@ -1,3 +1,4 @@
+const { logCommand } = require('./db');
 const fs = require("node:fs");
 const path = require("node:path");
 const { Client, Events, GatewayIntentBits, EmbedBuilder, PermissionFlagsBits, REST, Routes, SlashCommandBuilder } = require("discord.js");
@@ -80,6 +81,13 @@ client.once(Events.ClientReady, async readyClient => {
 
 client.on(Events.InteractionCreate, async interaction => {
   if (!interaction.isChatInputCommand()) return;
+    
+    // Log command usage to SQLite database
+    try {
+        logCommand(interaction.commandName, interaction.user.id, interaction.guildId);
+    } catch (err) {
+        console.error('Failed to log command:', err);
+    }
 
   try {
     if (["moderation", "channel", "role", "server", "curio-byte", "analytics"].includes(interaction.commandName)) {
