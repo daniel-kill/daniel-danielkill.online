@@ -2,10 +2,11 @@ const fs = require('node:fs/promises');
 const path = require('node:path');
 const { SlashCommandBuilder, EmbedBuilder, ChannelType, PermissionFlagsBits } = require('discord.js');
 const { BACKUP_ROOT } = require('../server-backup');
+const { getGuildCommandStats, getTotalCommandsCount } = require('../db');
 
 const analyticsCommand = new SlashCommandBuilder()
   .setName('analytics')
-  .setDescription('View server metrics, member breakdowns, and backup analytics')
+  .setDescription('View server metrics, member breakdowns, command telemetry, and backup analytics')
   .setDefaultMemberPermissions(PermissionFlagsBits.Administrator);
 
 async function getBackupStats(guildId) {
@@ -59,6 +60,20 @@ async function handleAnalyticsCommand(interaction) {
 
   const backupStats = await getBackupStats(guild.id);
 
+  // Fetch SQLite command telemetry for this guild
+  let commandSummary = 'No commands logged yet.';
+  try {
+    const totalCmds = getTotalCommandsCount(guild.id);
+    const topCommands = getGuildCommandStats(guild.id).slice(0, 5);
+    if (topCommands.length > 0) {
+      commandSummary = topCommands
+        .map(cmd => `• **/${cmd.command}:** ${cmd.count} use(s)`)
+        .join('\n') + `\n\n*Total Invocations:* ${totalCmds}`;
+    }
+  } catch (err) {
+    console.error('Failed to retrieve analytics from SQLite:', err);
+  }
+
   const embed = new EmbedBuilder()
     .setColor(0x8b8df8)
     .setTitle(`📊 Server Analytics & Health — ${guild.name}`)
@@ -80,12 +95,17 @@ async function handleAnalyticsCommand(interaction) {
         inline: true
       },
       {
+        name: '⚡ Top Commands (SQLite Telemetry)',
+        value: commandSummary,
+        inline: false
+      },
+      {
         name: '💾 Backup System Analytics',
         value: `• **Saved Backups:** ${backupStats.totalBackups} snapshots\n• **Latest Snapshot Size:** ${backupStats.latestSizeKb} KB\n• **Oldest Record:** ${backupStats.oldestBackup}`,
         inline: false
       }
     )
-    .setFooter({ text: 'Curio.Byte Administrative Analytics' })
+    .setFooter({ text: 'Curio.Byte Administrative Analytics · SQLite Powered' })
     .setTimestamp();
 
   await interaction.editReply({ embeds: [embed] });

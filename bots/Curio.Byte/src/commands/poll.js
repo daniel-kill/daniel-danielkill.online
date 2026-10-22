@@ -1,4 +1,6 @@
 const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType } = require('discord.js');
+const crypto = require('node:crypto');
+const { createPoll, updatePollMessageId, closePoll, recordVote, hasVoted, getPollVotes } = require('../db');
 
 const pollCommand = new SlashCommandBuilder()
   .setName('poll')
@@ -21,12 +23,30 @@ async function handlePollCommand(interaction) {
   const opt1 = interaction.options.getString('option1') || 'Yes';
   const opt2 = interaction.options.getString('option2') || 'No';
 
-  let votesOpt1 = 0;
-  let votesOpt2 = 0;
-  const voters = new Set();
+  // Generate unique poll identifier
+  const pollId = crypto.randomUUID();
+
+  // Persist poll definition into SQLite
+  try {
+    createPoll(pollId, interaction.guildId, interaction.channelId, null, question, opt1, opt2, interaction.user.id);
+  } catch (err) {
+    console.error('Failed to persist poll creation:', err);
+  }
 
   const createEmbed = (isClosed = false) => {
-    const total = votesOpt1 + votesOpt2;
+    let votesOpt1 = 0;
+    let votesOpt2 = 0;
+    let total = 0;
+
+    try {
+      const stats = getPollVotes(pollId);
+      votesOpt1 = stats.votesOpt1;
+      votesOpt2 = stats.votesOpt2;
+      total = stats.totalVotes;
+    } catch (err) {
+      console.error('Failed to fetch poll vote counts:', err);
+    }
+
     const pct1 = total > 0 ? Math.round((votesOpt1 / total) * 100) : 0;
     const pct2 = total > 0 ? Math.round((votesOpt2 / total) * 100) : 0;
 
@@ -39,17 +59,17 @@ async function handlePollCommand(interaction) {
         `*Total Votes:* ${total}` +
         (isClosed ? '\n\n🔒 **This poll is now closed.**' : '')
       )
-      .setFooter({ text: `Created by ${interaction.user.tag}` })
+      .setFooter({ text: `Created by ${interaction.user.tag} · Poll ID: ${pollId.slice(0, 8)}` })
       .setTimestamp();
   };
 
   const row = new ActionRowBuilder().addComponents(
     new ButtonBuilder()
-      .setCustomId('poll_opt1')
+      .setCustomId(`poll_opt1_${pollId}`)
       .setLabel(opt1)
       .setStyle(ButtonStyle.Primary),
     new ButtonBuilder()
-      .setCustomId('poll_opt2')
+      .setCustomId(`poll_opt2_${pollId}`)
       .setLabel(opt2)
       .setStyle(ButtonStyle.Secondary)
   );
@@ -60,33 +80,50 @@ async function handlePollCommand(interaction) {
     fetchReply: true
   });
 
+  try {
+    updatePollMessageId(pollId, response.id);
+  } catch (err) {
+    console.error('Failed to link poll message ID:', err);
+  }
+
   const collector = response.createMessageComponentCollector({
     componentType: ComponentType.Button,
-    time: 300000
+    time: 300000 // 5 minutes active duration
   });
 
   collector.on('collect', async i => {
-    if (voters.has(i.user.id)) {
-      await i.reply({ content: 'You have already voted in this poll!', ephemeral: true });
-      return;
+    try {
+      const alreadyVoted = hasVoted(pollId, i.user.id);
+      if (alreadyVoted) {
+        await i.reply({ content: 'You have already voted in this poll!', ephemeral: true });
+        return;
+      }
+
+      const choice = i.customId.startsWith('poll_opt1') ? 1 : 2;
+      recordVote(pollId, i.user.id, choice);
+
+      await i.update({ embeds: [createEmbed()] });
+    } catch (err) {
+      console.error('Failed to record poll vote:', err);
+      await i.reply({ content: 'An error occurred recording your vote.', ephemeral: true }).catch(() => {});
     }
-
-    voters.add(i.user.id);
-    if (i.customId === 'poll_opt1') votesOpt1++;
-    if (i.customId === 'poll_opt2') votesOpt2++;
-
-    await i.update({ embeds: [createEmbed()] });
   });
 
   collector.on('end', async () => {
+    try {
+      closePoll(pollId);
+    } catch (err) {
+      console.error('Failed to set poll as closed in DB:', err);
+    }
+
     const disabledRow = new ActionRowBuilder().addComponents(
       new ButtonBuilder()
-        .setCustomId('poll_opt1')
+        .setCustomId(`poll_opt1_${pollId}`)
         .setLabel(opt1)
         .setStyle(ButtonStyle.Primary)
         .setDisabled(true),
       new ButtonBuilder()
-        .setCustomId('poll_opt2')
+        .setCustomId(`poll_opt2_${pollId}`)
         .setLabel(opt2)
         .setStyle(ButtonStyle.Secondary)
         .setDisabled(true)

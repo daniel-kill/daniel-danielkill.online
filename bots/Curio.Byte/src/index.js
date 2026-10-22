@@ -5,7 +5,7 @@ const { Client, Events, GatewayIntentBits, EmbedBuilder, PermissionFlagsBits, RE
 const { adminCommands, handleAdminCommand } = require("./admin-commands");
 const { aiPromptCommand, handleAiPromptCommand, handleAiPromptTestCommand } = require("./ai-prompt-command");
 const { startServerBackups } = require("./server-backup");
-const { setupGuild, sendLog, attachAuditLogging } = require("./server-setup");
+const { setupCurioByte, attachAuditLogging, curioCommand } = require("./server-setup");
 const { pollCommand, handlePollCommand } = require("./commands/poll");
 const { projectCommand, handleProjectCommand } = require("./commands/project");
 const { analyticsCommand, handleAnalyticsCommand } = require("./commands/analytics");
@@ -37,16 +37,6 @@ const client = new Client({
 attachAuditLogging(client);
 
 const inviteUrl = config.inviteUrl || `https://discord.com/oauth2/authorize?client_id=${config.applicationId}&scope=bot%20applications.commands`;
-
-// Define the /curio-byte setup command builder locally to prevent undefined exports
-const curioCommand = new SlashCommandBuilder()
-  .setName("curio-byte")
-  .setDescription("Curio.Byte administrative commands")
-  .addSubcommand(subcommand =>
-    subcommand
-      .setName("setup")
-      .setDescription("Provision private admin category and enable audit logging")
-  );
 
 const commandDefinitions = [
   new SlashCommandBuilder().setName("about").setDescription("Learn about Curio.Byte and its mission."),
@@ -104,7 +94,14 @@ client.on(Events.InteractionCreate, async interaction => {
         return;
       }
       if (interaction.commandName === "curio-byte") {
-        await setupGuild(interaction);
+        await interaction.deferReply({ ephemeral: true });
+        const { category, channels } = await setupCurioByte(interaction);
+        await interaction.editReply([
+          "Curio.Byte setup completed. The category and channels are private to server administrators and the bot.",
+          `Category: ${category.name}`,
+          `Channels: ${channels.logs.name} and ${channels.chats.name}`,
+          "Server event logging is now enabled. Member join/leave, timeout and voice mute changes, channel/role changes, message edits/deletions, bans, and other supported events will be sent to #logs."
+        ].join("\n"));
         return;
       }
       await interaction.deferReply({ ephemeral: true });
