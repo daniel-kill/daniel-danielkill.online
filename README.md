@@ -1,45 +1,41 @@
-# Curio.Byte & Dotfiles Repository
+# Daniel Kill — Primary Website 🌐
 
-The central repository for **Code, Build, Repeat**, featuring personal configuration dotfiles and the custom **`Curio.Byte`** Discord bot.
-
----
-
-## 🤖 Curio.Byte Discord Bot
-
-`Curio.Byte` is a modular, multi-purpose Discord bot built with `discord.js` designed for server management, interactive community features, automated backups, and portfolio exploration.
-
-### 🚀 Key Features & Command Suite
-*   **`/analytics`** — Administrative command to inspect live server metrics (member breakdowns, channel/role stats) and backup system analytics.
-*   **`/poll`** — Create interactive, button-based server polls.
-*   **`/project`** — Search portfolio projects from Code, Build, Repeat by keyword or technology stack.
-*   **`/ai-prompt`** — Multi-provider AI assistant integration supporting Groq, Cloudflare Workers AI, Gemini, OpenRouter, and Venice.
-*   **`/curio-byte setup`** — Automatically provision private administrative channels and enable comprehensive server event audit logging.
-*   **`/moderation` & Administrative Tools** — Channel management, role configurations, and server health checks restricted to administrators.
+Source repository for Daniel Kill's personal portfolio website ([danielkill.online](https://daniel-danielkill-online.pages.dev/)).
 
 ---
 
-## ⚙️ Automated CI/CD Pipeline
+## 🛠️ Stack & Architecture
 
-The bot runs on a self-hosted VPS (`srv1752914`) utilizing user-level `systemd` services with lingering enabled. 
-*   **Zero-Touch Deployment:** Powered by GitHub Actions (`appleboy/ssh-action`), every push to `main` automatically updates the VPS working tree via HTTPS remote fetching and cleanly restarts the `curio-byte` service with the correct D-Bus/XDG runtime environment.
-*   **Automatic Registration:** On startup, `Curio.Byte` automatically syncs and registers all slash command definitions globally.
+- **Frontend**: Semantic HTML5, modern CSS3 (responsive grid, CSS custom properties), lightweight vanilla JavaScript.
+- **Hosting**: Cloudflare Pages / Static Hosting.
+- **Performance**: Zero external build dependencies, optimized WebP imagery, fast load times.
 
 ---
 
 ## 📁 Repository Structure
 
 ```text
-├── bots/
-│   └── Curio.Byte/
-│       ├── src/
-│       │   ├── commands/       # Modular command implementations (poll, project, analytics)
-│       │   ├── index.js        # Main bot entry point & auto-registration
-│       │   ├── server-backup.js # Automated server state backup engine
-│       │   └── server-setup.js  # Audit logging & administrative setup utilities
-│       └── .private/           # Local configuration and tokens (ignored)
-├── .github/
-│   └── workflows/
-│       └── deploy.yml          # Zero-touch CI/CD deployment automation
-└── README.md
+├── assets/           # Supporting static assets
+├── images/           # WebP portrait and visual assets
+├── index.html        # Main landing page and portfolio showcase
+├── styles.css        # Responsive stylesheet
+├── script.js         # Interactive site behaviors
+├── favicon.svg       # Vector site favicon
+├── PROJECTS.md       # Directory of featured repositories and tools
+└── README.md         # Repository documentation
 ```
-Stay curious. Keep building. Repeat.
+
+---
+
+## 🔗 Related Repositories
+
+* [**daniel-kill/curio-byte**](https://github.com/daniel-kill/curio-byte) — The official Discord community bot.
+* [**daniel-kill/portfolio-projects**](https://github.com/daniel-kill/portfolio-projects) — Standalone scripting and system utilities suite.
+* [**daniel-kill/devpulse**](https://github.com/daniel-kill/devpulse) — Workspace audit and telemetry CLI.
+* [**daniel-kill/games**](https://github.com/daniel-kill/games) — Interactive PowerShell text adventures and simulations.
+
+---
+
+## 📜 License
+
+[MIT License](LICENSE) © Daniel Kill

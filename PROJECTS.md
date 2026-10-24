@@ -1,17 +1,15 @@
-# Coding Portfolio Projects
+# Coding Portfolio & Projects 💻
 
-These are small practice projects for my portfolio, covering scripting and programming.
+Overview of software projects, developer tools, and repositories maintained by [Daniel Kill](https://github.com/daniel-kill).
 
-> These are practice projects, not client work or production-ready tools.
+---
 
-## Projects
+## 🚀 Projects & Repositories
 
-| Project | Language | Includes |
+| Repository | Focus / Languages | Description |
 |---|---|---|
-| [System Health Reporter](projects/powershell-system-health/) | PowerShell | Windows system inventory, structured output, JSON export |
-| [Log File Analyzer](projects/node-log-analyzer/) | Node.js | CLI design, streaming input, parsing, aggregation |
-| [Safe Backup Utility](projects/shell-safe-backup/) | POSIX shell | Validation, safe defaults, archives, exit codes |
-| [File Organizer](projects/csharp-file-organizer/) | C# / .NET 8 | Console apps, LINQ, file-system operations, preview mode |
-| [Curio.Byte](bots/Curio.Byte/) | Node.js / discord.js | Discord slash commands, portfolio showcase, server administration |
-
-Each project folder includes instructions and source code. For now, they all live in this repository.
+| [**devpulse**](https://github.com/daniel-kill/devpulse) | Python 3 / Typer / Rich | High-performance CLI telemetry utility, workspace git auditing, and GPG security verification. |
+| [**curio-byte**](https://github.com/daniel-kill/curio-byte) | Node.js / discord.js / SQLite | Multi-purpose Discord bot with AI integrations, interactive slash commands, automated backups, and administrative tools. |
+| [**portfolio-projects**](https://github.com/daniel-kill/portfolio-projects) | C# (.NET 8), Node.js, PowerShell, Bash | Modular showcase of scripting tools: system health reporter, log file analyzer, backup utility, and file organizer. |
+| [**games**](https://github.com/daniel-kill/games) | PowerShell 7 | Terminal games, text adventures, and classic retro entertainment simulations. |
+| [**secret-sentinel**](https://github.com/daniel-kill/secret-sentinel) | Python 3 | High-throughput secrets, API tokens, and credentials security scanner using Shannon entropy analysis. |
